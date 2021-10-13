@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, world!");
+    println!("welcom from subbeat, work in progress");
 }
