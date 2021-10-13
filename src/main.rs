@@ -1,4 +1,5 @@
 use clap::{App, Arg, SubCommand};
+use subbeat::grafana_service;
 
 mod types;
 
@@ -8,15 +9,26 @@ async fn main() -> types::Result<()> {
         .version("0.0.2")
         .about("Timeseries toolkit")
         .arg(
-            Arg::with_name("GRAFANA_API_KEY")
-                .help("Grafna API Key. Go to http://<grafana-url>/org/apikeys to get one")
+            Arg::with_name("GRAFANA_URL")
+                .help("URL to your Grafana instance")
                 .required(true)
                 .index(1),
         )
+        .arg(
+            Arg::with_name("GRAFANA_API_KEY")
+                .help("Grafna API Key. Go to http://<grafana-url>/org/apikeys to get one")
+                .required(true)
+                .index(2),
+        )
         .get_matches();
 
-    // eyJrIjoiWnRRMTNmcGpvTHNPb3UzNzdUNUphRm53Rk9tMTNzOTQiLCJuIjoic3ViYmVhdC10ZXN0IiwiaWQiOjF9
-    let input = matches.value_of("GRAFANA_API_KEY").unwrap();
+    let url = matches.value_of("GRAFANA_URL").unwrap();
+    let key = matches.value_of("GRAFANA_API_KEY").unwrap();
 
-    println!("input file for influxdb {}", input);
+    let gs = grafana_service::GrafanaService::new(url.to_string(), key.to_string());
+
+    gs.test_connection().await?;
+
+
+    Ok(())
 }
