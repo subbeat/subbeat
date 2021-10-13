@@ -29,6 +29,5 @@ async fn main() -> types::Result<()> {
 
     gs.test_connection().await?;
 
-
     Ok(())
 }
