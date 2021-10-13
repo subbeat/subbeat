@@ -10,7 +10,10 @@ documentation = "https://docs.rs/subbeat"
 repository = "https://github.com/subbeat/subbeat"
 readme = "README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+tokio = { version = "1", features = ["full"] }
 clap = "2.33.3"
+hyper = "0.14.13"
+hyper-tls = "0.5.0"
+
+
