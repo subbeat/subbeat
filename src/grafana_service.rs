@@ -37,20 +37,21 @@ impl GrafanaService {
             .body(Body::from(json!({ 
                 "query":"go_memstats_alloc_bytes_total", 
                 "from": "1634163645",
-                "to": "1634163945", 
+                "to": "1634163945",
                 "step": "15"
             }).to_string())
             )
-                
+
             .unwrap();
 
         Ok(())
     }
 
-    async fn get(&self, suburl:&str) -> types::Result<()> {
+    async fn get(&self, suburl:&str) -> types::Result<serde_json::Value> {
         let req = Request::builder()
             .method(Method::GET)
             .uri(self.url.to_owned() + suburl)
+            .header("Accept", "application/json")
             .header("Authorization", format!("Bearer {}", self.api_key))
             .body(Body::empty())
             .unwrap();
@@ -61,20 +62,21 @@ impl GrafanaService {
         println!("");
 
         let body = hyper::body::aggregate(res).await?;
-        let mut reader = body.reader();
-        let mut line = String::new();
-        loop {
-            match reader.read_line(&mut line) {
-                Ok(s) => {
-                    if s == 0 {
-                        break;
-                    }
-                    println!("{}", line);
-                    line.clear();
-                },
-                Err(_) => break
-            }
-        }
-        Ok(())
+        let reader = body.reader();
+        let result: serde_json::Value = serde_json::from_reader(reader)?;
+        // let mut line = String::new();
+        // loop {
+        //     match reader.read_line(&mut line) {
+        //         Ok(s) => {
+        //             if s == 0 {
+        //                 break;
+        //             }
+        //             println!("{}", line);
+        //             line.clear();
+        //         },
+        //         Err(_) => break
+        //     }
+        // }
+        Ok(result)
     }
 }
