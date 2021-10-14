@@ -28,6 +28,7 @@ async fn main() -> types::Result<()> {
     let gs = grafana_service::GrafanaService::new(url.to_string(), key.to_string());
 
     gs.test_connection().await?;
+    gs.get_datasources().await?;
     gs.extract_metrics().await?;
 
     Ok(())

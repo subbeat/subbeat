@@ -1,4 +1,4 @@
-use std::io::BufRead;
+use std::{io::BufRead};
 
 use hyper::{Body, Client, Method, Request};
 use tokio::io::{stdout, AsyncWriteExt as _};
@@ -18,55 +18,63 @@ impl GrafanaService {
     }
 
     pub async fn test_connection(&self) -> types::Result<()> {
-        let req = Request::builder()
-            .method(Method::GET)
-            .uri(self.url.clone())
-            .header("Authorization", format!("Bearer {}", self.api_key))
-            .body(Default::default())
-            .unwrap();
+        println!("Test connection response");
+        self.get("/api").await?;
+        Ok(())
+    }
 
-        let client = Client::new();
-        let resp = client.request(req).await?;
-        println!("Response: {}", resp.status());
+    pub async fn get_datasources(&self) -> types::Result<()> {
+        self.get("/api/datasources").await?;
         Ok(())
     }
 
     pub async fn extract_metrics(&self) -> types::Result<()> {
         let req = Request::builder()
-            .method(Method::POST)
             .uri(self.url.clone() + "/api/datasources/proxy/1/api/v1/query_range")
-            .header("content-type", "application/json")
             .header("Authorization", format!("Bearer {}", self.api_key))
+            .method(Method::POST)
+            .header("content-type", "application/json")
             .body(Body::from(json!({ 
                 "query":"go_memstats_alloc_bytes_total", 
-                "start": "1634163645",
-                "end": "1634163945", 
+                "from": "1634163645",
+                "to": "1634163945", 
                 "step": "15"
             }).to_string())
             )
                 
             .unwrap();
 
+        Ok(())
+    }
+
+    async fn get(&self, suburl:&str) -> types::Result<()> {
+        let req = Request::builder()
+            .method(Method::GET)
+            .uri(self.url.to_owned() + suburl)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .body(Body::empty())
+            .unwrap();
+
         let client = Client::new();
         let res = client.request(req).await?;
         println!("Response: {}", res.status());
-            
-        // while let Some(next) = resp.body().data().await {
-        //     let chunk = next?;
-        //     io::stdout().write_all(&chunk).await?;
-        // }
-        
+        println!("");
+
         let body = hyper::body::aggregate(res).await?;
         let mut reader = body.reader();
         let mut line = String::new();
         loop {
             match reader.read_line(&mut line) {
-                Ok(_) => println!("{}", line),
+                Ok(s) => {
+                    if s == 0 {
+                        break;
+                    }
+                    println!("{}", line);
+                    line.clear();
+                },
                 Err(_) => break
             }
         }
-        
-
         Ok(())
     }
 }
