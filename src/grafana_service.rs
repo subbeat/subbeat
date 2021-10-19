@@ -1,10 +1,9 @@
-use std::{io::BufRead};
-
-use hyper::{Body, Client, Method, Request};
-use tokio::io::{stdout, AsyncWriteExt as _};
-use serde_json::json;
-
 use crate::types;
+
+use hyper::{Body, Client, Method, Request, StatusCode};
+use serde_json::json;
+use tokio::io::{stdout, AsyncWriteExt as _};
+
 use bytes::Buf as _;
 
 pub struct GrafanaService {
@@ -19,35 +18,50 @@ impl GrafanaService {
 
     pub async fn test_connection(&self) -> types::Result<()> {
         println!("Test connection response");
-        self.get("/api").await?;
+        let (s, p) = self.get("/api").await?;
+        println!("{}", p.to_string());
         Ok(())
     }
 
     pub async fn get_datasources(&self) -> types::Result<()> {
-        self.get("/api/datasources").await?;
+        let (s, p) = self.get("/api/datasources").await?;
+        println!("{}", p);
         Ok(())
     }
 
     pub async fn extract_metrics(&self) -> types::Result<()> {
-        let req = Request::builder()
-            .uri(self.url.clone() + "/api/datasources/proxy/1/api/v1/query_range")
-            .header("Authorization", format!("Bearer {}", self.api_key))
-            .method(Method::POST)
-            .header("content-type", "application/json")
-            .body(Body::from(json!({ 
-                "query":"go_memstats_alloc_bytes_total", 
-                "from": "1634163645",
-                "to": "1634163945",
-                "step": "15"
-            }).to_string())
+        let (s, p) = self
+            .post(
+                "/api/datasources/proxy/1/api/v1/query_range",
+                // serde_json::json!({
+                    // "from": "1634237655",
+                    // "to": "1634238555",
+                    // "queries": [
+                    //     {
+                    //         "datasourceId": 1,
+                    //         "refId": "A",
+                    //         "expr": "rate(go_memstats_alloc_bytes_total[5m])",
+                    //         "format": "time_series",
+                    //         "step": "15",
+                    //         "start": "1634329050",
+                    //         "end": "1634329950"
+                    //     }
+                    // ]
+                    // "query": "rate(go_memstats_alloc_bytes_total[5m])",
+                    // "start": 1634672070,
+                    // "end": 1634672970,
+                    // "step": "15"
+                // }),
+                serde_json::json!({})
+                
             )
-
-            .unwrap();
+            .await?;
+        println!("{}", p.to_string());
 
         Ok(())
     }
 
-    async fn get(&self, suburl:&str) -> types::Result<serde_json::Value> {
+    async fn get(&self, suburl: &str) -> types::Result<(StatusCode, serde_json::Value)> {
         let req = Request::builder()
             .method(Method::GET)
             .uri(self.url.to_owned() + suburl)
@@ -58,25 +72,37 @@ impl GrafanaService {
 
         let client = Client::new();
         let res = client.request(req).await?;
-        println!("Response: {}", res.status());
-        println!("");
+        let status = res.status();
 
         let body = hyper::body::aggregate(res).await?;
         let reader = body.reader();
         let result: serde_json::Value = serde_json::from_reader(reader)?;
-        // let mut line = String::new();
-        // loop {
-        //     match reader.read_line(&mut line) {
-        //         Ok(s) => {
-        //             if s == 0 {
-        //                 break;
-        //             }
-        //             println!("{}", line);
-        //             line.clear();
-        //         },
-        //         Err(_) => break
-        //     }
-        // }
-        Ok(result)
+        Ok((status, result))
+    }
+
+    async fn post(
+        &self,
+        suburl: &str,
+        value: serde_json::Value,
+    ) -> types::Result<(StatusCode, serde_json::Value)> {
+        let req = Request::builder()
+            .method(Method::POST)
+            .uri(self.url.to_owned() + suburl)
+            .header("Accept", "application/json")
+            // .header("Content-Type", "application/json")
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            // .body(Body::from(value.to_string()))
+            .body(Body::from("query=rate%28go_memstats_alloc_bytes_total%5B5m%5D%29&start=1634672070&end=1634672970&step=15"))
+            .unwrap();
+
+        let client = Client::new();
+        let res = client.request(req).await?;
+        let status = res.status();
+
+        let body = hyper::body::aggregate(res).await?;
+        let reader = body.reader();
+        let result: serde_json::Value = serde_json::from_reader(reader)?;
+        Ok((status, result))
     }
 }
