@@ -1,4 +1,7 @@
+use async_trait::async_trait;
 use std::collections::HashMap;
+
+use crate::types;
 
 pub type MetricId = String;
 
@@ -23,6 +26,9 @@ struct MetricQuery {
     headers: Option<HashMap<String, String>>,
 }
 
-trait Metric {
-    fn query();
+pub type MetricResult = Vec<(u64, f64)>;
+
+#[async_trait]
+pub trait Metric {
+    async fn query(&self, from: u64, to: u64) -> types::Result<MetricResult>;
 }

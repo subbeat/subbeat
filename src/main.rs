@@ -29,7 +29,8 @@ async fn main() -> types::Result<()> {
 
     // gs.test_connection().await?;
     // gs.get_datasources().await?;
-    gs.extract_metrics().await?;
+    gs.extract_metrics("http://localhost:3000/d/YeBxHjzWz/starter-app-stats?editPanel=2&orgId=1")
+        .await?;
 
     Ok(())
 }
