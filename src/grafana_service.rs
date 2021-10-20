@@ -1,4 +1,4 @@
-use crate::types;
+use crate::{metric::MetricResult, types};
 
 use hyper::{Body, Client, Method, Request, StatusCode};
 use tokio::io::{stdout, AsyncWriteExt as _};
@@ -34,7 +34,7 @@ impl GrafanaService {
         Ok(())
     }
 
-    pub async fn extract_metrics(&self, panel_url: &str) -> types::Result<()> {
+    pub async fn extract_metrics(&self, panel_url: &str) -> types::Result<MetricResult> {
         let pm = prometheus::Prometheus::new(
             self,
             "/api/datasources/proxy/1/api/v1/query_range",
@@ -43,8 +43,7 @@ impl GrafanaService {
         );
         let r = pm.query(1634672070, 1634672970).await?;
 
-
-        Ok(())
+        Ok(r)
     }
 
     async fn get(&self, suburl: &str) -> types::Result<(StatusCode, serde_json::Value)> {

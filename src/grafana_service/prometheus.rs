@@ -71,7 +71,7 @@ fn parse_result(value: Value) -> types::Result<MetricResult> {
     let mut result = MetricResult::new();
     result.insert(metric_name, values.to_owned());
 
-    println!("{:?}", result);
+    // println!("{:?}", result);
 
     return Ok(result);
 }

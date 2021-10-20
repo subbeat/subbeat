@@ -29,8 +29,16 @@ async fn main() -> types::Result<()> {
 
     // gs.test_connection().await?;
     // gs.get_datasources().await?;
-    gs.extract_metrics("http://localhost:3000/d/YeBxHjzWz/starter-app-stats?editPanel=2&orgId=1")
+    let r = gs.extract_metrics("http://localhost:3000/d/YeBxHjzWz/starter-app-stats?editPanel=2&orgId=1")
         .await?;
+
+    let key = r.keys().nth(0).unwrap();
+    println!("{}", key);
+
+    let vs = &r[key];
+    for (t, v) in vs.iter() {
+        println!("{}\t{}", t, v);
+    }
 
     Ok(())
 }
