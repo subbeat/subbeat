@@ -1,4 +1,7 @@
+use std::{collections::HashMap, result};
+
 use async_trait::async_trait;
+use serde_json::Value;
 
 use crate::{
     metric::{Metric, MetricResult},
@@ -6,6 +9,8 @@ use crate::{
 };
 
 use serde_derive::{Deserialize, Serialize};
+
+use serde_qs as qs;
 
 use super::GrafanaService;
 
@@ -33,6 +38,39 @@ impl<'a> Prometheus<'a> {
     }
 }
 
+fn parse_result(value: Value) -> types::Result<MetricResult> {
+    let metric = &value["data"]["result"][0]["metric"];
+    let metric_name = metric
+        .as_object()
+        .unwrap()
+        .iter()
+        .map(|(k, v)| format!("{}=\"{}\"", k, v.as_str().unwrap()))
+        .collect::<Vec<String>>()
+        .join(",");
+
+    let metric_name = format!("{{{}}}", metric_name);
+
+    let values = &value["data"]["result"][0]["values"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| {
+            let r = e.as_array().unwrap();
+            return (
+                r[0].as_u64().unwrap(),
+                r[1].as_str().unwrap().to_string().parse::<f64>().unwrap(),
+            );
+        })
+        .collect::<Vec<(u64, f64)>>();
+
+    let mut result = MetricResult::new();
+    result.insert(metric_name, values.to_owned());
+
+    println!("{:?}", result);
+
+    return Ok(result);
+}
+
 #[async_trait]
 impl Metric for Prometheus<'_> {
     async fn query(&self, from: u64, to: u64) -> types::Result<MetricResult> {
@@ -44,15 +82,16 @@ impl Metric for Prometheus<'_> {
         };
         let url = "/api/datasources/proxy/1/api/v1/query_range";
         // TODO: use serialisatoin from serde
-        let rq = "query=rate%28go_memstats_alloc_bytes_total%5B5m%5D%29&start=1634672070&end=1634672970&step=15";
+
+        let rq = qs::to_string(&q)?;
         let (status_code, value) = self.grafana_service.post_form(&url, &rq).await?;
         // TODO: return error
         // if status_code != StatusCode::OK {
         //     return std::error::("Bad status code");
         // }
 
-        println!("{:?}", value);
+        // println!("{:?}", value);
 
-        return Ok(Vec::new());
+        return parse_result(value);
     }
 }

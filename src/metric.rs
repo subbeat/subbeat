@@ -26,7 +26,7 @@ struct MetricQuery {
     headers: Option<HashMap<String, String>>,
 }
 
-pub type MetricResult = Vec<(u64, f64)>;
+pub type MetricResult = HashMap<String, Vec<(u64, f64)>>;
 
 #[async_trait]
 pub trait Metric {
