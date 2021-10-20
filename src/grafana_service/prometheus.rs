@@ -1,5 +1,3 @@
-use std::{collections::HashMap, result};
-
 use async_trait::async_trait;
 use serde_json::Value;
 
@@ -15,6 +13,7 @@ use serde_qs as qs;
 use super::GrafanaService;
 
 pub struct Prometheus<'a> {
+    url: String,
     query: String,
     step: u32,
     grafana_service: &'a GrafanaService,
@@ -29,8 +28,14 @@ struct Query {
 }
 
 impl<'a> Prometheus<'a> {
-    pub fn new(grafana_service: &'a GrafanaService, query: &str, step: u32) -> Prometheus<'a> {
+    pub fn new(
+        grafana_service: &'a GrafanaService,
+        url: &str,
+        query: &str,
+        step: u32,
+    ) -> Prometheus<'a> {
         Prometheus {
+            url: url.to_owned(),
             grafana_service,
             query: query.to_string(),
             step,
@@ -80,11 +85,11 @@ impl Metric for Prometheus<'_> {
             start: from,
             end: to,
         };
-        let url = "/api/datasources/proxy/1/api/v1/query_range";
+
         // TODO: use serialisatoin from serde
 
         let rq = qs::to_string(&q)?;
-        let (status_code, value) = self.grafana_service.post_form(&url, &rq).await?;
+        let (status_code, value) = self.grafana_service.post_form(&self.url, &rq).await?;
         // TODO: return error
         // if status_code != StatusCode::OK {
         //     return std::error::("Bad status code");

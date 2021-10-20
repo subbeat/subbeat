@@ -35,10 +35,14 @@ impl GrafanaService {
     }
 
     pub async fn extract_metrics(&self, panel_url: &str) -> types::Result<()> {
-        let pm = prometheus::Prometheus::new(self, "rate(go_memstats_alloc_bytes_total[5m])", 15);
-        let r = pm.query(1634672070, 1634672970).await;
+        let pm = prometheus::Prometheus::new(
+            self,
+            "/api/datasources/proxy/1/api/v1/query_range",
+            "rate(go_memstats_alloc_bytes_total[5m])",
+            15,
+        );
+        let r = pm.query(1634672070, 1634672970).await?;
 
-        // println!("{}", p.to_string());
 
         Ok(())
     }
