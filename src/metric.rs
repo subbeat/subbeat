@@ -30,5 +30,5 @@ pub type MetricResult = HashMap<String, Vec<(u64, f64)>>;
 
 #[async_trait]
 pub trait Metric {
-    async fn query(&self, from: u64, to: u64) -> types::Result<MetricResult>;
+    async fn query(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult>;
 }

@@ -29,7 +29,8 @@ async fn main() -> types::Result<()> {
 
     // gs.test_connection().await?;
     // gs.get_datasources().await?;
-    let r = gs.extract_metrics("http://localhost:3000/d/YeBxHjzWz/starter-app-stats?editPanel=2&orgId=1")
+    // "http://localhost:3000/d/YeBxHjzWz/starter-app-stats?editPanel=2&orgId=1"
+    let r = gs.extract_metrics("/api/datasources/proxy/1/api/v1/query_range", "rate(go_memstats_alloc_bytes_total[5m])", 1634672070, 1634672970, 15)
         .await?;
 
     let key = r.keys().nth(0).unwrap();

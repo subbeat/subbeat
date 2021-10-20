@@ -15,16 +15,15 @@ use super::GrafanaService;
 pub struct Prometheus<'a> {
     url: String,
     query: String,
-    step: u32,
     grafana_service: &'a GrafanaService,
 }
 
 #[derive(Deserialize, Serialize)]
 struct Query {
     query: String,
-    step: u32,
     start: u64,
     end: u64,
+    step: u64
 }
 
 impl<'a> Prometheus<'a> {
@@ -32,13 +31,11 @@ impl<'a> Prometheus<'a> {
         grafana_service: &'a GrafanaService,
         url: &str,
         query: &str,
-        step: u32,
     ) -> Prometheus<'a> {
         Prometheus {
             url: url.to_owned(),
             grafana_service,
             query: query.to_string(),
-            step,
         }
     }
 }
@@ -78,10 +75,10 @@ fn parse_result(value: Value) -> types::Result<MetricResult> {
 
 #[async_trait]
 impl Metric for Prometheus<'_> {
-    async fn query(&self, from: u64, to: u64) -> types::Result<MetricResult> {
+    async fn query(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
         let q = Query {
             query: self.query.to_owned(),
-            step: self.step,
+            step: step,
             start: from,
             end: to,
         };
