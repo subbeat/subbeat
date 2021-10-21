@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use hyper::StatusCode;
 use serde_json::Value;
 
 use crate::{
@@ -61,8 +62,8 @@ fn parse_result(value: Value) -> types::Result<MetricResult> {
         })
         .collect::<Vec<(u64, f64)>>();
 
-    let mut result = MetricResult::new();
-    result.insert(metric_name, values.to_owned());
+    let mut result: MetricResult = Default::default();
+    result.data.insert(metric_name, values.to_owned());
 
     // println!("{:?}", result);
 
@@ -71,7 +72,11 @@ fn parse_result(value: Value) -> types::Result<MetricResult> {
 
 #[async_trait]
 impl Metric for Prometheus<'_> {
-    async fn query(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
+    async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
+        if from >= to {
+            panic!("from >= to");
+        }
+
         let q = Query {
             query: self.query.to_owned(),
             step: step,
@@ -79,14 +84,19 @@ impl Metric for Prometheus<'_> {
             end: to,
         };
 
-        // TODO: use serialisatoin from serde
-
         let rq = qs::to_string(&q)?;
         let (status_code, value) = self.grafana_service.post_form(&self.url, &rq).await?;
-        // TODO: return error
-        // if status_code != StatusCode::OK {
-        //     return std::error::("Bad status code");
-        // }
+
+        if status_code != StatusCode::OK {
+            // println!("Error: status code {:?}", status_code);
+            let error = &value["error"].as_str().unwrap();
+
+            return Err(anyhow::anyhow!("Can`t query: {}", error));
+        }
+
+        // println!("{:?}", value);
+
+        // return Ok(Default::default());
 
         // println!("{:?}", value);
 
