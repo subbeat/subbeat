@@ -23,15 +23,11 @@ struct Query {
     query: String,
     start: u64,
     end: u64,
-    step: u64
+    step: u64,
 }
 
 impl<'a> Prometheus<'a> {
-    pub fn new(
-        grafana_service: &'a GrafanaService,
-        url: &str,
-        query: &str,
-    ) -> Prometheus<'a> {
+    pub fn new(grafana_service: &'a GrafanaService, url: &str, query: &str) -> Prometheus<'a> {
         Prometheus {
             url: url.to_owned(),
             grafana_service,

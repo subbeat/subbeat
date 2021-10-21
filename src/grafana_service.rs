@@ -1,7 +1,6 @@
 use crate::{metric::MetricResult, types};
 
 use hyper::{Body, Client, Method, Request, StatusCode};
-use tokio::io::{stdout, AsyncWriteExt as _};
 
 use bytes::Buf as _;
 
@@ -34,12 +33,15 @@ impl GrafanaService {
         Ok(())
     }
 
-    pub async fn extract_metrics(&self, datasource_url: &str, query: &str, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
-        let pm = prometheus::Prometheus::new(
-            self,
-            datasource_url,
-            query
-        );
+    pub async fn extract_metrics(
+        &self,
+        datasource_url: &str,
+        query: &str,
+        from: u64,
+        to: u64,
+        step: u64,
+    ) -> types::Result<MetricResult> {
+        let pm = prometheus::Prometheus::new(self, datasource_url, query);
         // TODO: split big query to chunks
         let r = pm.query(from, to, step).await?;
         Ok(r)
