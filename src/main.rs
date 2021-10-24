@@ -7,13 +7,22 @@ mod types;
 async fn main() -> types::Result<()> {
     let cli = cli::CLI::new();
 
-    let gs = grafana::Grafana::new(cli.url.to_string(), cli.key.to_string());
+    let gs = grafana::Grafana::new(
+        cli.query_config.url.to_string(),
+        cli.query_config.key.to_string(),
+    );
 
     // gs.test_connection().await?;
     // gs.get_datasources().await?;
     // "http://localhost:3000/d/YeBxHjzWz/starter-app-stats?editPanel=2&orgId=1"
     let r = gs
-        .extract_metrics(&cli.datasource_url, &cli.query, cli.from, cli.to, cli.step)
+        .extract_metrics(
+            &cli.query_config.datasource_url,
+            &cli.query_config.query,
+            cli.query_config.from,
+            cli.query_config.to,
+            cli.query_config.step,
+        )
         .await?;
 
     let key = r.data.keys().nth(0).unwrap();

@@ -1,19 +1,14 @@
 use clap::{App, Arg, SubCommand};
+use subbeat::types::QueryConfig;
 
 pub struct CLI {
-    pub url: String,
-    pub key: String,
-    pub datasource_url: String,
-    pub query: String,
-    pub from: u64,
-    pub to: u64,
-    pub step: u64,
+    pub query_config: QueryConfig,
 }
 
 impl CLI {
     pub fn new() -> CLI {
         let matches = App::new("subbeat")
-            .version("0.0.2")
+            .version("0.0.4")
             .about("Timeseries toolkit")
             .subcommand(
                 SubCommand::with_name("grafana")
@@ -63,6 +58,40 @@ impl CLI {
                             .index(7),
                     ),
             )
+            .subcommand(
+                SubCommand::with_name("prometheus")
+                    .about("Use prometheus API as datasource")
+                    .arg(
+                        Arg::with_name("PROM_URL")
+                            .help("URL to your Grafana instance")
+                            .required(true)
+                            .index(1),
+                    )
+                    .arg(
+                        Arg::with_name("query")
+                            .help("your query to datasource")
+                            .required(true)
+                            .index(2),
+                    )
+                    .arg(
+                        Arg::with_name("from")
+                            .help("timestamp")
+                            .required(true)
+                            .index(3),
+                    )
+                    .arg(
+                        Arg::with_name("to")
+                            .help("timestampt")
+                            .required(true)
+                            .index(4),
+                    )
+                    .arg(
+                        Arg::with_name("step")
+                            .help("aggregation step")
+                            .required(true)
+                            .index(5),
+                    ),
+            )
             .get_matches();
 
         if let Some(matches) = matches.subcommand_matches("grafana") {
@@ -74,24 +103,39 @@ impl CLI {
             let to = matches.value_of("to").unwrap().parse().unwrap();
             let step = matches.value_of("step").unwrap().parse().unwrap();
             return CLI {
-                url: url.to_owned(),
-                key: key.to_owned(),
-                datasource_url: datasource_url.to_owned(),
-                query: query.to_owned(),
-                from,
-                to,
-                step,
+                query_config: QueryConfig {
+                    datasource_type: subbeat::types::DatasourceType::Grafana,
+                    url: url.to_owned(),
+                    key: key.to_owned(),
+                    datasource_url: datasource_url.to_owned(),
+                    query: query.to_owned(),
+                    from,
+                    to,
+                    step,
+                },
             };
-        } else {
+        };
+
+        if let Some(matches) = matches.subcommand_matches("prometheus") {
+            let url = matches.value_of("PROM_URL").unwrap();
+            let query = matches.value_of("query").unwrap();
+            let from = matches.value_of("from").unwrap().parse().unwrap();
+            let to = matches.value_of("to").unwrap().parse().unwrap();
+            let step = matches.value_of("step").unwrap().parse().unwrap();
             return CLI {
-                url: "url.to_owned()".to_string(),
-                key: "key.to_owned()".to_string(),
-                datasource_url: "datasource_url.to_owned()".to_string(),
-                query: "query.to_owned()".to_string(),
-                from: 0,
-                to: 0,
-                step: 0,
+                query_config: QueryConfig {
+                    datasource_type: subbeat::types::DatasourceType::Grafana,
+                    url: url.to_owned(),
+                    key: "key".to_owned(),
+                    datasource_url: "datasource_url".to_owned(),
+                    query: query.to_owned(),
+                    from,
+                    to,
+                    step,
+                },
             };
-        }
+        };
+
+        panic!("Unknown datasource");
     }
 }

@@ -9,8 +9,6 @@ mod prometheus;
 
 use serde_json;
 
-
-
 pub struct Grafana {
     url: String,
     api_key: String,
