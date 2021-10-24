@@ -11,12 +11,12 @@ use serde_derive::{Deserialize, Serialize};
 
 use serde_qs as qs;
 
-use super::GrafanaService;
+use super::Grafana;
 
 pub struct Prometheus<'a> {
     url: String,
     query: String,
-    grafana_service: &'a GrafanaService,
+    grafana_service: &'a Grafana,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -28,7 +28,7 @@ struct Query {
 }
 
 impl<'a> Prometheus<'a> {
-    pub fn new(grafana_service: &'a GrafanaService, url: &str, query: &str) -> Prometheus<'a> {
+    pub fn new(grafana_service: &'a Grafana, url: &str, query: &str) -> Prometheus<'a> {
         Prometheus {
             url: url.to_owned(),
             grafana_service,

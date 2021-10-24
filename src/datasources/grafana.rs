@@ -1,3 +1,4 @@
+use crate::metric::Metric;
 use crate::{metric::MetricResult, types};
 
 use hyper::{Body, Client, Method, Request, StatusCode};
@@ -8,16 +9,16 @@ mod prometheus;
 
 use serde_json;
 
-use crate::metric::Metric;
 
-pub struct GrafanaService {
+
+pub struct Grafana {
     url: String,
     api_key: String,
 }
 
-impl GrafanaService {
-    pub fn new(url: String, api_key: String) -> GrafanaService {
-        GrafanaService { api_key, url }
+impl Grafana {
+    pub fn new(url: String, api_key: String) -> Grafana {
+        Grafana { api_key, url }
     }
 
     pub async fn test_connection(&self) -> types::Result<()> {

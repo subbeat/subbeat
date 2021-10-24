@@ -1,4 +1,4 @@
-use subbeat::grafana_service;
+use subbeat::datasources::grafana;
 
 mod cli;
 mod types;
@@ -7,7 +7,7 @@ mod types;
 async fn main() -> types::Result<()> {
     let cli = cli::CLI::new();
 
-    let gs = grafana_service::GrafanaService::new(cli.url.to_string(), cli.key.to_string());
+    let gs = grafana::Grafana::new(cli.url.to_string(), cli.key.to_string());
 
     // gs.test_connection().await?;
     // gs.get_datasources().await?;

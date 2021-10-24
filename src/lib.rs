@@ -1,3 +1,3 @@
-pub mod grafana_service;
+pub mod datasources;
 pub mod metric;
 pub mod types;
