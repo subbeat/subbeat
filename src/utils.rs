@@ -1,40 +1,56 @@
-use bytes::Buf as _;
+use bytes::{buf::Reader, Buf};
 use hyper::{Body, Client, Method, Request, StatusCode};
 use std::io::Read;
 
 use crate::types;
 
-// TODO: move to utils
+fn print_buf(mut reader: Reader<impl Buf>) {
+    let mut dst = [0; 1024];
+    let mut vec = Vec::<u8>::new();
+
+    loop {
+        let num = reader.read(&mut dst).unwrap();
+        if num == 0 {
+            break;
+        }
+        for i in 0..num {
+            vec.push(dst[i]);
+        }
+    }
+
+    let str = String::from_utf8(vec).unwrap();
+    println!("{}", str);
+}
+
+pub fn normalize_url(url: String) -> String {
+    if url.ends_with("/") {
+        let res = url.strip_suffix("/").unwrap();
+        return res.to_string();
+    }
+    return url;
+}
+
 pub async fn get(url: &String) -> types::Result<(StatusCode, serde_json::Value)> {
-    let req = Request::builder()
+    let req_result = Request::builder()
         .method(Method::GET)
         .uri(url)
         .header("Accept", "application/json")
-        .body(Body::empty())
-        .unwrap();
+        .body(Body::empty());
+
+    if req_result.is_err() {
+        println!("{:?}", req_result);
+        panic!("Can`t connect");
+    }
+
+    let req = req_result.unwrap();
 
     let client = Client::new();
     let res = client.request(req).await?;
     let status = res.status();
 
     let body = hyper::body::aggregate(res).await?;
-    let mut reader = body.reader();
+    let reader = body.reader();
 
-    {
-        let mut dst = [0; 1024];
-        let num = reader.read(&mut dst).unwrap();
-        let mut vec = Vec::<u8>::new();
-        for i in 0..num {
-            vec.push(dst[i]);
-        }
-        let str = String::from_utf8(vec).unwrap();
-        println!("{}", str);
-    }
-
-    panic!("asdas");
-
-    // String::from_utf8(reader.bytes());
-
-    // let result: serde_json::Value = serde_json::from_reader(reader)?;
-    // Ok((status, result))
+    let result: serde_json::Value = serde_json::from_reader(reader)?;
+    Ok((status, result))
 }
