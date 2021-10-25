@@ -1,4 +1,4 @@
-use subbeat::datasources::grafana;
+use subbeat::{datasources::grafana, metric::Metric};
 
 mod cli;
 mod types;
@@ -10,15 +10,12 @@ async fn main() -> types::Result<()> {
     let gs = grafana::Grafana::new(
         cli.query_config.url.to_string(),
         cli.query_config.key.to_string(),
+        cli.query_config.datasource_url.to_string(),
+        cli.query_config.query.to_string(),
     );
 
-    // gs.test_connection().await?;
-    // gs.get_datasources().await?;
-    // "http://localhost:3000/d/YeBxHjzWz/starter-app-stats?editPanel=2&orgId=1"
     let r = gs
-        .extract_metrics(
-            &cli.query_config.datasource_url,
-            &cli.query_config.query,
+        .query(
             cli.query_config.from,
             cli.query_config.to,
             cli.query_config.step,

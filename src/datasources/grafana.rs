@@ -1,5 +1,6 @@
 use crate::metric::Metric;
 use crate::{metric::MetricResult, types};
+use async_trait::async_trait;
 
 use hyper::{Body, Client, Method, Request, StatusCode};
 
@@ -12,11 +13,18 @@ use serde_json;
 pub struct Grafana {
     url: String,
     api_key: String,
+    datasource_url: String,
+    query: String,
 }
 
 impl Grafana {
-    pub fn new(url: String, api_key: String) -> Grafana {
-        Grafana { api_key, url }
+    pub fn new(url: String, api_key: String, datasource_url: String, query: String) -> Grafana {
+        Grafana {
+            api_key,
+            url,
+            datasource_url,
+            query,
+        }
     }
 
     pub async fn test_connection(&self) -> types::Result<()> {
@@ -32,19 +40,17 @@ impl Grafana {
         Ok(())
     }
 
-    pub async fn extract_metrics(
-        &self,
-        datasource_url: &str,
-        query: &str,
-        from: u64,
-        to: u64,
-        step: u64,
-    ) -> types::Result<MetricResult> {
-        let pm = prometheus::Prometheus::new(self, datasource_url, query);
-        // TODO: split big query to chunks
-        let r = pm.query(from, to, step).await?;
-        Ok(r)
-    }
+    // pub async fn extract_metrics(
+    //     &self,
+    //     from: u64,
+    //     to: u64,
+    //     step: u64,
+    // ) -> types::Result<MetricResult> {
+    //     let pm = prometheus::Prometheus::new(self, &self.datasource_url, &self.query);
+    //     // TODO: split big query to chunks
+    //     let r = pm.query(from, to, step).await?;
+    //     Ok(r)
+    // }
 
     async fn get(&self, suburl: &str) -> types::Result<(StatusCode, serde_json::Value)> {
         let req = Request::builder()
@@ -111,5 +117,14 @@ impl Grafana {
         let reader = body.reader();
         let result: serde_json::Value = serde_json::from_reader(reader)?;
         Ok((status, result))
+    }
+}
+
+#[async_trait]
+impl Metric for Grafana {
+    async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
+        let pm = prometheus::Prometheus::new(self, &self.datasource_url, &self.query);
+        let r = pm.query(from, to, step).await?;
+        Ok(r)
     }
 }
