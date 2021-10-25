@@ -5,12 +5,13 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::{
     metric::{Metric, MetricResult},
-    types,
+    types, utils,
 };
 
 use serde_qs as qs;
 
 use bytes::Buf as _;
+use std::io::Read;
 
 pub struct Prometheus {
     url: String,
@@ -32,25 +33,6 @@ impl Prometheus {
             query: query.to_owned(),
         }
     }
-
-    // TODO: move to utils
-    async fn get(&self, suburl: &str) -> types::Result<(StatusCode, serde_json::Value)> {
-        let req = Request::builder()
-            .method(Method::GET)
-            .uri(self.url.to_owned() + suburl)
-            .header("Accept", "application/json")
-            .body(Body::empty())
-            .unwrap();
-
-        let client = Client::new();
-        let res = client.request(req).await?;
-        let status = res.status();
-
-        let body = hyper::body::aggregate(res).await?;
-        let reader = body.reader();
-        let result: serde_json::Value = serde_json::from_reader(reader)?;
-        Ok((status, result))
-    }
 }
 
 #[async_trait]
@@ -64,7 +46,12 @@ impl Metric for Prometheus {
         };
         let qs = qs::to_string(&q)?;
 
-        println!("prom str: {}", qs);
+        let url = format!("{}/api/v1/query_range?{}", self.url, qs);
+
+        let v = utils::get(&url).await?;
+
+        println!("Prom value:");
+        println!("{:?}", &v);
         // TODO: query
         // TODO: parse
         return Ok(Default::default());
