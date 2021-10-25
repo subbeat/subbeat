@@ -124,7 +124,7 @@ impl CLI {
             let step = matches.value_of("step").unwrap().parse().unwrap();
             return CLI {
                 query_config: QueryConfig {
-                    datasource_type: subbeat::types::DatasourceType::Grafana,
+                    datasource_type: subbeat::types::DatasourceType::Prometheus,
                     url: url.to_owned(),
                     key: "key".to_owned(),
                     datasource_url: "datasource_url".to_owned(),
