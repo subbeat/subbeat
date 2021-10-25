@@ -38,6 +38,8 @@ impl Prometheus {
 }
 
 pub fn parse_result(value: Value) -> types::Result<MetricResult> {
+    // TODO: check that metric exists
+    // TODO: check status: "error"
     let metric = &value["data"]["result"][0]["metric"];
     let metric_name = metric
         .as_object()
