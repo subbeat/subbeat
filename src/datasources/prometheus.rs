@@ -8,7 +8,7 @@ use crate::{
 
 use bytes::Buf as _;
 
-struct Prometheus {
+pub struct Prometheus {
     url: String,
     query: String,
 }
@@ -44,6 +44,8 @@ impl Prometheus {
 #[async_trait]
 impl Metric for Prometheus {
     async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
+        // TODO: query
+        // TODO: parse
         return Ok(Default::default());
     }
 }

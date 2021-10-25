@@ -40,18 +40,6 @@ impl Grafana {
         Ok(())
     }
 
-    // pub async fn extract_metrics(
-    //     &self,
-    //     from: u64,
-    //     to: u64,
-    //     step: u64,
-    // ) -> types::Result<MetricResult> {
-    //     let pm = prometheus::Prometheus::new(self, &self.datasource_url, &self.query);
-    //     // TODO: split big query to chunks
-    //     let r = pm.query(from, to, step).await?;
-    //     Ok(r)
-    // }
-
     async fn get(&self, suburl: &str) -> types::Result<(StatusCode, serde_json::Value)> {
         let req = Request::builder()
             .method(Method::GET)

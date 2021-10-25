@@ -4,6 +4,7 @@ use anyhow;
 
 pub type Result<T> = anyhow::Result<T>;
 
+#[derive(PartialEq)]
 pub enum DatasourceType {
     Grafana,
     Prometheus,
