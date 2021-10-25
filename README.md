@@ -9,5 +9,12 @@ subbeat grafana http://localhost:3000 eyJrIjoiWnRRMTNmcGpvTHNPb3UzNzdUNUphRm53Rk
 
 
 ### Datasources
+
+#### Prometheus
+
+```
+subbeat prometheus http://localhost:9090/ "rate(go_memstats_alloc_bytes_total[5m])" 1634172070 1635110190 15
+```
+
 #### Grafana
 * Prometheus

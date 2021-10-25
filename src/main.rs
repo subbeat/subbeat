@@ -1,4 +1,7 @@
-use subbeat::{datasources::grafana, metric::Metric};
+use subbeat::{
+    datasources::{grafana, resolve},
+    metric::Metric,
+};
 
 mod cli;
 mod types;
@@ -7,14 +10,9 @@ mod types;
 async fn main() -> types::Result<()> {
     let cli = cli::CLI::new();
 
-    let gs = grafana::Grafana::new(
-        cli.query_config.url.to_string(),
-        cli.query_config.key.to_string(),
-        cli.query_config.datasource_url.to_string(),
-        cli.query_config.query.to_string(),
-    );
+    let ds = resolve(&cli.query_config);
 
-    let r = gs
+    let r = ds
         .query(
             cli.query_config.from,
             cli.query_config.to,

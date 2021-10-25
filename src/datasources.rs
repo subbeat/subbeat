@@ -6,7 +6,7 @@ use crate::{
 pub mod grafana;
 pub mod prometheus;
 
-pub fn resolve(query_config: &QueryConfig) -> Box<dyn Metric> {
+pub fn resolve(query_config: &QueryConfig) -> Box<dyn Metric + Sync> {
     if query_config.datasource_type == DatasourceType::Grafana {
         let gs = grafana::Grafana::new(
             query_config.url.to_string(),
