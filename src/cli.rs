@@ -8,7 +8,7 @@ pub struct CLI {
 impl CLI {
     pub fn new() -> CLI {
         let matches = App::new("subbeat")
-            .version("0.0.4")
+            .version("0.0.5")
             .about("Timeseries toolkit")
             .subcommand(
                 SubCommand::with_name("grafana")

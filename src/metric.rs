@@ -4,6 +4,7 @@ use std::{collections::HashMap, result};
 use crate::types;
 
 pub type MetricId = String;
+use serde_derive::Serialize;
 
 const CHUNK_SIZE: u64 = 10_000;
 
@@ -28,6 +29,7 @@ struct MetricQuery {
     headers: Option<HashMap<String, String>>,
 }
 
+#[derive(Serialize)]
 pub struct MetricResult {
     pub data: HashMap<String, Vec<(u64, f64)>>,
 }

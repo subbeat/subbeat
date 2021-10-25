@@ -37,8 +37,7 @@ impl Prometheus {
     }
 }
 
-// code duplication...
-fn parse_result(value: Value) -> types::Result<MetricResult> {
+pub fn parse_result(value: Value) -> types::Result<MetricResult> {
     let metric = &value["data"]["result"][0]["metric"];
     let metric_name = metric
         .as_object()
