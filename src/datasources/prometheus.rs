@@ -40,6 +40,15 @@ impl Prometheus {
 pub fn parse_result(value: Value) -> types::Result<MetricResult> {
     // TODO: check that metric exists
     // TODO: check status: "error"
+    if value.get("data").is_none() {
+        return Err(anyhow::format_err!("no data in response"));
+    }
+    if value["data"].get("result").is_none() {
+        return Err(anyhow::format_err!("no result in response"));
+    }
+    if value["data"]["result"].as_array().unwrap().len() == 0 {
+        return Ok(Default::default());
+    }
     let metric = &value["data"]["result"][0]["metric"];
     let metric_name = metric
         .as_object()

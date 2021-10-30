@@ -20,12 +20,15 @@ async fn main() -> types::Result<()> {
         )
         .await?;
 
-    let key = r.data.keys().nth(0).unwrap();
-    println!("{}", key);
-
-    let vs = &r.data[key];
-    for (t, v) in vs.iter() {
-        println!("{}\t{}", t, v);
+    if r.data.keys().len() > 0 {
+        let key = r.data.keys().nth(0).unwrap();
+        println!("timestamp\t{}", key);
+        let vs = &r.data[key];
+        for (t, v) in vs.iter() {
+            println!("{}\t{}", t, v);
+        }
+    } else {
+        println!("no_data");
     }
 
     Ok(())
