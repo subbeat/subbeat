@@ -106,37 +106,37 @@ impl CLI {
                         Arg::with_name("ORG_ID")
                             .help("URL to your influxdb instance")
                             .required(true)
-                            .index(1),
+                            .index(2),
                     )
                     .arg(
                         Arg::with_name("TOKEN")
                             .help("URL to your influxdb instance")
                             .required(true)
-                            .index(1),
+                            .index(3),
                     )
                     .arg(
                         Arg::with_name("query")
                             .help("your flux query to datasource")
                             .required(true)
-                            .index(2),
+                            .index(4),
                     )
                     .arg(
                         Arg::with_name("from")
                             .help("timestamp")
                             .required(true)
-                            .index(3),
+                            .index(5),
                     )
                     .arg(
                         Arg::with_name("to")
                             .help("timestampt")
                             .required(true)
-                            .index(4),
+                            .index(6),
                     )
                     .arg(
                         Arg::with_name("step")
                             .help("aggregation step")
                             .required(true)
-                            .index(5),
+                            .index(7),
                     ),
             )
             .get_matches();
@@ -184,7 +184,7 @@ impl CLI {
         };
 
         if let Some(matches) = matches.subcommand_matches("influx") {
-            let url = matches.value_of("PROM_URL").unwrap();
+            let url = matches.value_of("INFLUX_URL").unwrap();
             let org_id = matches.value_of("ORG_ID").unwrap();
             let token = matches.value_of("TOKEN").unwrap();
             let query = matches.value_of("query").unwrap();

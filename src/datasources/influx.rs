@@ -38,12 +38,16 @@ impl Metric for Influx {
     async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
         
         let url = format!(
-            "{}/api/v2/query?orgId={}",
+            "{}/api/v2/query?orgID={}",
             normalize_url(self.url.to_owned()),
             self.org_id
         );
+
+        println!("URL: {}", url);
         let mut headers = HashMap::new();
+        headers.insert("Accept".to_string(), "application/csv".to_owned());
         headers.insert("Authorization".to_string(), format!("Token {}", self.token).to_owned());
+        headers.insert("Content-type".to_string(), "application/vnd.flux".to_owned());
         let (_status_code, value) = utils::post_with_headers(&url, headers).await?;
 
         return parse_result(value);

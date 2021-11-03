@@ -68,8 +68,8 @@ pub async fn post_with_headers(url: &String, headers: HashMap<String, String>) -
     
 
     let req_result = builder.body(Body::from("from(bucket:\"main-backet\")
-    //         |> range(start:-1m)
-    //         |> filter(fn:(r) => r._measurement == \"cpu\")"));
+             |> range(start:-1m)
+             |> filter(fn:(r) => r._measurement == \"cpu\")"));
 
     if req_result.is_err() {
         println!("{:?}", req_result);
