@@ -55,7 +55,7 @@ pub async fn get(url: &String) -> types::Result<(StatusCode, serde_json::Value)>
     Ok((status, result))
 }
 
-pub async fn post_with_headers(url: &String, headers: HashMap<String, String>) -> types::Result<(StatusCode, serde_json::Value)> {
+pub async fn post_with_headers(url: &String, headers: HashMap<String, String>) -> types::Result<(StatusCode, Reader<impl Buf>)> {
 
     let mut builder = Request::builder()
         .method(Method::POST)
@@ -68,8 +68,9 @@ pub async fn post_with_headers(url: &String, headers: HashMap<String, String>) -
     
 
     let req_result = builder.body(Body::from("from(bucket:\"main-backet\")
+             |> filter(fn:(r) => r._measurement == \"cpu\")
              |> range(start:-1m)
-             |> filter(fn:(r) => r._measurement == \"cpu\")"));
+             "));
 
     if req_result.is_err() {
         println!("{:?}", req_result);
@@ -85,8 +86,5 @@ pub async fn post_with_headers(url: &String, headers: HashMap<String, String>) -
     let body = hyper::body::aggregate(res).await?;
     let reader = body.reader();
 
-    print_buf(reader);
-    // let result: serde_json::Value = serde_json::from_reader(reader)?;
-    Err(anyhow::format_err!("yo yo"))
-    // Ok((status, result))
+    Ok((status, reader))
 }

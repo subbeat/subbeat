@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use async_trait::async_trait;
 
+use bytes::{Buf, buf::Reader};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -29,8 +30,17 @@ impl Influx {
     }
 }
 
-pub fn parse_result(value: Value) -> types::Result<MetricResult> {
-    Err(anyhow::format_err!("not implemented"))
+pub fn parse_result(reader: Reader<impl Buf>) -> types::Result<MetricResult> {
+    let mut rdr = csv::Reader::from_reader(reader);
+    for result in rdr.records() {
+        let record = result?;
+        println!("{:?}", record);
+    }
+
+    let mut result: MetricResult = Default::default();
+    // result.data.insert(metric_name, values.to_owned());
+
+    Ok(result)
 }
 
 #[async_trait]
@@ -43,7 +53,6 @@ impl Metric for Influx {
             self.org_id
         );
 
-        println!("URL: {}", url);
         let mut headers = HashMap::new();
         headers.insert("Accept".to_string(), "application/csv".to_owned());
         headers.insert("Authorization".to_string(), format!("Token {}", self.token).to_owned());
