@@ -10,6 +10,13 @@ pub struct PrometheusConfig {
     pub query: String,
 }
 
+pub struct InfluxConfig {
+    pub url: String,
+    pub org_id: String,
+    pub token: String,
+    pub query: String,
+}
+
 
 pub struct GrafanaConfig {
     pub url: String,
@@ -21,7 +28,8 @@ pub struct GrafanaConfig {
 
 pub enum DatasourceConfig {
     Grafana(GrafanaConfig),
-    Prometheus(PrometheusConfig)
+    Prometheus(PrometheusConfig),
+    Influx(InfluxConfig)
 }
 
 pub struct QueryConfig {

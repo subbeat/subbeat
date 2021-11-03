@@ -1,6 +1,6 @@
 use bytes::{buf::Reader, Buf};
 use hyper::{Body, Client, Method, Request, StatusCode};
-use std::io::Read;
+use std::{collections::HashMap, io::Read};
 
 use crate::types;
 
@@ -53,4 +53,40 @@ pub async fn get(url: &String) -> types::Result<(StatusCode, serde_json::Value)>
 
     let result: serde_json::Value = serde_json::from_reader(reader)?;
     Ok((status, result))
+}
+
+pub async fn post_with_headers(url: &String, headers: HashMap<String, String>) -> types::Result<(StatusCode, serde_json::Value)> {
+
+    let mut builder = Request::builder()
+        .method(Method::POST)
+        .uri(url);
+        //.header("Accept", "application/json");
+
+    for (k, v) in headers {
+        builder = builder.header(k, v);
+    }
+    
+
+    let req_result = builder.body(Body::from("from(bucket:\"main-backet\")
+    //         |> range(start:-1m)
+    //         |> filter(fn:(r) => r._measurement == \"cpu\")"));
+
+    if req_result.is_err() {
+        println!("{:?}", req_result);
+        panic!("Can`t connect");
+    }
+
+    let req = req_result.unwrap();
+
+    let client = Client::new();
+    let res = client.request(req).await?;
+    let status = res.status();
+
+    let body = hyper::body::aggregate(res).await?;
+    let reader = body.reader();
+
+    print_buf(reader);
+    // let result: serde_json::Value = serde_json::from_reader(reader)?;
+    Err(anyhow::format_err!("yo yo"))
+    // Ok((status, result))
 }
