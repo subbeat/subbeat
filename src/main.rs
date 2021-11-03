@@ -9,7 +9,7 @@ mod types;
 async fn main() -> types::Result<()> {
     let cli = cli::CLI::new();
 
-    let ds = resolve(&cli.query_config);
+    let ds = resolve(&cli.query_config.datasource_config);
 
     let r = ds
         .query(

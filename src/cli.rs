@@ -1,5 +1,5 @@
 use clap::{App, Arg, SubCommand};
-use subbeat::types::QueryConfig;
+use subbeat::{datasources::grafana::Grafana, types::{DatasourceConfig, GrafanaConfig, PrometheusConfig, QueryConfig}};
 
 pub struct CLI {
     pub query_config: QueryConfig,
@@ -104,11 +104,12 @@ impl CLI {
             let step = matches.value_of("step").unwrap().parse().unwrap();
             return CLI {
                 query_config: QueryConfig {
-                    datasource_type: subbeat::types::DatasourceType::Grafana,
-                    url: url.to_owned(),
-                    key: key.to_owned(),
-                    datasource_url: datasource_url.to_owned(),
-                    query: query.to_owned(),
+                    datasource_config: DatasourceConfig::Grafana(GrafanaConfig {
+                        url: url.to_owned(),
+                        api_key: key.to_owned(),
+                        datasource_url: datasource_url.to_owned(),
+                        query: query.to_owned()
+                    }),
                     from,
                     to,
                     step,
@@ -124,11 +125,10 @@ impl CLI {
             let step = matches.value_of("step").unwrap().parse().unwrap();
             return CLI {
                 query_config: QueryConfig {
-                    datasource_type: subbeat::types::DatasourceType::Prometheus,
-                    url: url.to_owned(),
-                    key: "key".to_owned(),
-                    datasource_url: "datasource_url".to_owned(),
-                    query: query.to_owned(),
+                    datasource_config: DatasourceConfig::Prometheus(PrometheusConfig {
+                        url: url.to_owned(),
+                        query: query.to_owned()
+                    }),
                     from,
                     to,
                     step,

@@ -3,11 +3,7 @@ use async_trait::async_trait;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{
-    metric::{Metric, MetricResult},
-    types,
-    utils::{self, normalize_url},
-};
+use crate::{metric::{Metric, MetricResult}, types::{self, PrometheusConfig}, utils::{self, normalize_url}};
 
 use serde_qs as qs;
 
@@ -26,10 +22,10 @@ struct Query {
 }
 
 impl Prometheus {
-    pub fn new(url: &String, query: &String) -> Prometheus {
+    pub fn new(cfg: &PrometheusConfig) -> Prometheus {
         Prometheus {
-            url: url.to_owned(),
-            query: query.to_owned(),
+            url: cfg.url.to_owned(),
+            query: cfg.query.to_owned(),
         }
     }
 }

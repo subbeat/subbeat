@@ -1,4 +1,5 @@
 use crate::metric::Metric;
+use crate::types::GrafanaConfig;
 use crate::{metric::MetricResult, types};
 use async_trait::async_trait;
 
@@ -18,12 +19,12 @@ pub struct Grafana {
 }
 
 impl Grafana {
-    pub fn new(url: String, api_key: String, datasource_url: String, query: String) -> Grafana {
+    pub fn new(config: &GrafanaConfig) -> Grafana {
         Grafana {
-            api_key,
-            url,
-            datasource_url,
-            query,
+            api_key: config.api_key.to_owned(),
+            url: config.url.to_owned(),
+            datasource_url: config.datasource_url.to_owned(),
+            query: config.query.to_owned(),
         }
     }
 

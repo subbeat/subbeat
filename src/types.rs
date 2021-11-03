@@ -4,19 +4,31 @@ use anyhow;
 
 pub type Result<T> = anyhow::Result<T>;
 
-#[derive(PartialEq)]
-pub enum DatasourceType {
-    Grafana,
-    Prometheus,
+
+pub struct PrometheusConfig {
+    pub url: String,
+    pub query: String,
+}
+
+
+pub struct GrafanaConfig {
+    pub url: String,
+    pub api_key: String,
+    pub datasource_url: String,
+    pub query: String,
+}
+
+
+pub enum DatasourceConfig {
+    Grafana(GrafanaConfig),
+    Prometheus(PrometheusConfig)
 }
 
 pub struct QueryConfig {
-    pub datasource_type: DatasourceType,
-    pub url: String,
-    pub key: String,
-    pub datasource_url: String,
-    pub query: String,
+    pub datasource_config: DatasourceConfig,
     pub from: u64,
     pub to: u64,
-    pub step: u64,
+    pub step: u64
 }
+
+
