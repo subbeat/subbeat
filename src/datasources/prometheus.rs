@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use hyper::{Body, Client, Method, Request, StatusCode};
 
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
@@ -12,9 +11,7 @@ use crate::{
 
 use serde_qs as qs;
 
-use bytes::Buf as _;
-use std::io::Read;
-
+#[derive(Clone)]
 pub struct Prometheus {
     url: String,
     query: String,

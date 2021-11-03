@@ -1,6 +1,5 @@
 use subbeat::{
-    datasources::{grafana, resolve},
-    metric::Metric,
+    datasources::resolve,
 };
 
 mod cli;
