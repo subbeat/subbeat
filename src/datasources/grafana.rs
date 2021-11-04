@@ -11,6 +11,7 @@ mod prometheus;
 
 use serde_json;
 
+#[derive(Clone)]
 pub struct Grafana {
     url: String,
     api_key: String,
@@ -112,8 +113,12 @@ impl Grafana {
 #[async_trait]
 impl Metric for Grafana {
     async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
-        let pm = prometheus::Prometheus::new(self, &self.datasource_url, &self.query);
+        let pm = prometheus::Prometheus::new(self.clone(), &self.datasource_url, &self.query);
         let r = pm.query(from, to, step).await?;
         Ok(r)
+    }
+
+    fn boxed_clone(&self) -> Box<dyn Metric> {
+        return Box::new(self.clone());
     }
 }

@@ -58,6 +58,9 @@ impl Default for MetricResult {
 
 #[async_trait]
 pub trait Metric {
+
+    fn boxed_clone(&self) -> Box<dyn Metric>;
+
     // (to - from) / step < 10000
     async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult>;
 

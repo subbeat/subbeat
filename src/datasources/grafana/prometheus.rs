@@ -13,10 +13,11 @@ use serde_qs as qs;
 
 use super::Grafana;
 
-pub struct Prometheus<'a> {
+#[derive(Clone)]
+pub struct Prometheus {
     url: String,
     query: String,
-    grafana_service: &'a Grafana,
+    grafana_service: Grafana,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -27,8 +28,8 @@ struct Query {
     step: u64,
 }
 
-impl<'a> Prometheus<'a> {
-    pub fn new(grafana_service: &'a Grafana, url: &str, query: &str) -> Prometheus<'a> {
+impl Prometheus {
+    pub fn new(grafana_service: Grafana, url: &str, query: &str) -> Prometheus {
         Prometheus {
             url: url.to_owned(),
             grafana_service,
@@ -38,7 +39,7 @@ impl<'a> Prometheus<'a> {
 }
 
 #[async_trait]
-impl Metric for Prometheus<'_> {
+impl Metric for Prometheus {
     async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
         if from >= to {
             panic!("from >= to");
@@ -60,5 +61,9 @@ impl Metric for Prometheus<'_> {
         }
 
         return prometheus::parse_result(value);
+    }
+
+    fn boxed_clone(&self) -> Box<dyn Metric> {
+        return Box::new(self.clone());
     }
 }

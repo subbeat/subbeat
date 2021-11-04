@@ -97,4 +97,8 @@ impl Metric for Prometheus {
 
         return parse_result(value);
     }
+
+    fn boxed_clone(&self) -> Box<dyn Metric> {
+        return Box::new(self.clone());
+    }
 }

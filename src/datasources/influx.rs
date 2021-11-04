@@ -89,6 +89,10 @@ impl Metric for Influx {
 
         return parse_result(value);
     }
+
+    fn boxed_clone(&self) -> Box<dyn Metric> {
+        return Box::new(self.clone());
+    }
 }
 
 // curl -XPOST "localhost:8086/api/v2/query?orgID=5abe4759f7360f1c" -sS \
