@@ -118,7 +118,7 @@ impl Metric for Grafana {
         Ok(r)
     }
 
-    fn boxed_clone(&self) -> Box<dyn Metric + Sync> {
+    fn boxed_clone(&self) -> Box<dyn Metric + Sync + Send> {
         return Box::new(self.clone());
     }
 }

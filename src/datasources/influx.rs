@@ -90,7 +90,7 @@ impl Metric for Influx {
         return parse_result(value);
     }
 
-    fn boxed_clone(&self) -> Box<dyn Metric + Sync> {
+    fn boxed_clone(&self) -> Box<dyn Metric + Sync + Send> {
         return Box::new(self.clone());
     }
 }
