@@ -4,7 +4,7 @@ pub mod prometheus;
 
 use crate::{metric::Metric, types::DatasourceConfig};
 
-pub fn resolve(config: &DatasourceConfig) -> Box<dyn Metric + Sync> {
+pub fn resolve(config: &DatasourceConfig) -> Box<dyn Metric + Sync + Send> {
     match config {
         DatasourceConfig::Grafana(cfg) => Box::new(grafana::Grafana::new(cfg)),
         DatasourceConfig::Prometheus(cfg) => Box::new(prometheus::Prometheus::new(cfg)),
