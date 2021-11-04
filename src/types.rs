@@ -4,11 +4,13 @@ use anyhow;
 
 pub type Result<T> = anyhow::Result<T>;
 
+#[derive(Clone)]
 pub struct PrometheusConfig {
     pub url: String,
     pub query: String,
 }
 
+#[derive(Clone)]
 pub struct InfluxConfig {
     pub url: String,
     pub org_id: String,
@@ -16,6 +18,7 @@ pub struct InfluxConfig {
     pub query: String,
 }
 
+#[derive(Clone)]
 pub struct GrafanaConfig {
     pub url: String,
     pub api_key: String,
@@ -23,6 +26,7 @@ pub struct GrafanaConfig {
     pub query: String,
 }
 
+#[derive(Clone)]
 pub enum DatasourceConfig {
     Grafana(GrafanaConfig),
     Prometheus(PrometheusConfig),
