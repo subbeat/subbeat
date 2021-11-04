@@ -1,5 +1,8 @@
 use clap::{App, Arg, SubCommand};
-use subbeat::{datasources::grafana::Grafana, types::{DatasourceConfig, GrafanaConfig, InfluxConfig, PrometheusConfig, QueryConfig}};
+use subbeat::{
+    datasources::grafana::Grafana,
+    types::{DatasourceConfig, GrafanaConfig, InfluxConfig, PrometheusConfig, QueryConfig},
+};
 
 pub struct CLI {
     pub query_config: QueryConfig,
@@ -155,7 +158,7 @@ impl CLI {
                         url: url.to_owned(),
                         api_key: key.to_owned(),
                         datasource_url: datasource_url.to_owned(),
-                        query: query.to_owned()
+                        query: query.to_owned(),
                     }),
                     from,
                     to,
@@ -174,7 +177,7 @@ impl CLI {
                 query_config: QueryConfig {
                     datasource_config: DatasourceConfig::Prometheus(PrometheusConfig {
                         url: url.to_owned(),
-                        query: query.to_owned()
+                        query: query.to_owned(),
                     }),
                     from,
                     to,
@@ -197,7 +200,7 @@ impl CLI {
                         url: url.to_owned(),
                         org_id: org_id.to_owned(),
                         token: token.to_owned(),
-                        query: query.to_owned()
+                        query: query.to_owned(),
                     }),
                     from,
                     to,

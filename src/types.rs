@@ -4,7 +4,6 @@ use anyhow;
 
 pub type Result<T> = anyhow::Result<T>;
 
-
 pub struct PrometheusConfig {
     pub url: String,
     pub query: String,
@@ -17,7 +16,6 @@ pub struct InfluxConfig {
     pub query: String,
 }
 
-
 pub struct GrafanaConfig {
     pub url: String,
     pub api_key: String,
@@ -25,18 +23,15 @@ pub struct GrafanaConfig {
     pub query: String,
 }
 
-
 pub enum DatasourceConfig {
     Grafana(GrafanaConfig),
     Prometheus(PrometheusConfig),
-    Influx(InfluxConfig)
+    Influx(InfluxConfig),
 }
 
 pub struct QueryConfig {
     pub datasource_config: DatasourceConfig,
     pub from: u64,
     pub to: u64,
-    pub step: u64
+    pub step: u64,
 }
-
-

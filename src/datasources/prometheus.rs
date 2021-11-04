@@ -3,7 +3,11 @@ use async_trait::async_trait;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{metric::{Metric, MetricResult}, types::{self, PrometheusConfig}, utils::{self, normalize_url}};
+use crate::{
+    metric::{Metric, MetricResult},
+    types::{self, PrometheusConfig},
+    utils::{self, normalize_url},
+};
 
 use serde_qs as qs;
 

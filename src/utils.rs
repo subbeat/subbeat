@@ -1,5 +1,5 @@
 use bytes::{buf::Reader, Buf};
-use hyper::{Body, Client, Method, Request, StatusCode};
+use hyper::{body, Body, Client, Method, Request, StatusCode};
 use std::{collections::HashMap, io::Read};
 
 use crate::types;
@@ -55,22 +55,19 @@ pub async fn get(url: &String) -> types::Result<(StatusCode, serde_json::Value)>
     Ok((status, result))
 }
 
-pub async fn post_with_headers(url: &String, headers: HashMap<String, String>) -> types::Result<(StatusCode, Reader<impl Buf>)> {
-
-    let mut builder = Request::builder()
-        .method(Method::POST)
-        .uri(url);
-        //.header("Accept", "application/json");
+pub async fn post_with_headers(
+    url: &String,
+    headers: &HashMap<String, String>,
+    body: hyper::Body,
+) -> types::Result<(StatusCode, Reader<impl Buf>)> {
+    let mut builder = Request::builder().method(Method::POST).uri(url);
+    //.header("Accept", "application/json");
 
     for (k, v) in headers {
         builder = builder.header(k, v);
     }
-    
 
-    let req_result = builder.body(Body::from("from(bucket:\"main-backet\")
-             |> filter(fn:(r) => r._measurement == \"cpu\")
-             |> range(start:-1m)
-             "));
+    let req_result = builder.body(body);
 
     if req_result.is_err() {
         println!("{:?}", req_result);

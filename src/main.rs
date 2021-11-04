@@ -1,6 +1,4 @@
-use subbeat::{
-    datasources::resolve,
-};
+use subbeat::datasources::resolve;
 
 mod cli;
 mod types;
