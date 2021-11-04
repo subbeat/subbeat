@@ -22,7 +22,7 @@ impl Influx {
     pub fn new(cfg: &InfluxConfig) -> Influx {
         if !cfg.query.contains("$range") {
             panic!(
-                "Bad query: missing $range variable. Example: \n from(bucket:\"main-backet\") |> $range |> filter(fn:(r) => r._measurement == \"cpu\")"
+                "Bad query: missing $range variable. Example: \n 'from(bucket: \"main-backet\") |> $range |> filter(fn: (r) => r[\"_measurement\"] == \"cpu\") |> filter(fn: (r) => r[\"_field\"] == \"usage_softirq\") |> filter(fn: (r) => r[\"cpu\"] == \"cpu-total\") |> filter(fn: (r) => r[\"host\"] == \"roid\") |> yield(name: \"mean\")')"
             );
         }
 
@@ -36,20 +36,51 @@ impl Influx {
 }
 
 pub fn parse_result(reader: Reader<impl Buf>) -> types::Result<MetricResult> {
+
+    // println!("---------------");
+    // utils::print_buf(reader);
+    // println!("xxxxxxxxxxxxxxx");
+    // return Ok(Default::default());
+
     let mut rdr = csv::Reader::from_reader(reader);
-    // for h in rdr.headers() {
-    //     println!("{:?}", h);
-    // }
+
+    let hdrs = rdr.headers();
+    if hdrs.is_err() {
+        return Err(anyhow::format_err!(
+            "Cant' extract metric: headers are empty"
+        ));
+    }
+
+    let hdrs = hdrs.unwrap();
+    if hdrs.len() == 0 {
+        return Ok(Default::default());
+    }
+
+    // TODO: get it from actual response
+    let measurement_name_position = 8usize;
+
+    if hdrs.get(measurement_name_position).is_none() {
+        // println!("HEADERS:");
+        // for h in hdrs {
+        //     println!("{}", h);
+        // }
+        return Err(anyhow::format_err!(
+            "Cant' extract metric: no measurement at position {}", measurement_name_position
+        ));
+    }
     // println!("len: {:?}", rdr.headers().unwrap().get(9));
-    let measurement = rdr.headers().unwrap().get(9).unwrap().to_owned();
+    let measurement = hdrs.get(measurement_name_position).unwrap().to_owned();
+
     // println!("_measurement {}", measurement);
 
     let mut ts = Vec::new();
     for result in rdr.records() {
         let record = result?;
-        let t = chrono::DateTime:: parse_from_rfc3339(record.get(5).unwrap()).unwrap().timestamp() as u64;
+        let t = chrono::DateTime::parse_from_rfc3339(record.get(5).unwrap())
+            .unwrap()
+            .timestamp() as u64;
         let v = record.get(6).unwrap().parse::<f64>().unwrap();
-        ts.push((t,v));
+        ts.push((t, v));
         // println!("{:?} > {:?}", t, v);
         // println!("{:?}", record);
     }
@@ -64,11 +95,15 @@ pub fn parse_result(reader: Reader<impl Buf>) -> types::Result<MetricResult> {
 #[async_trait]
 impl Metric for Influx {
     async fn query_chunk(&self, from: u64, to: u64, step: u64) -> types::Result<MetricResult> {
+        // TODO: use step
+
         let url = format!(
             "{}/api/v2/query?orgID={}",
             normalize_url(self.url.to_owned()),
             self.org_id
         );
+
+        // println!("{}", url);
 
         let mut headers = HashMap::new();
         headers.insert("Accept".to_string(), "application/csv".to_owned());
@@ -83,15 +118,17 @@ impl Metric for Influx {
 
         let range_str = format!("range(start:{},stop:{})", from, to);
         let query = self.query.replace("$range", range_str.as_str());
+
+        // println!("query: {}", query);
         let body = hyper::Body::from(query);
 
-        let (_status_code, value) = utils::post_with_headers(&url, &headers, body).await?;
+        let (_status_code, reader) = utils::post_with_headers(&url, &headers, body).await?;
 
-        return parse_result(value);
+        parse_result(reader)
     }
 
     fn boxed_clone(&self) -> Box<dyn Metric + Sync + Send> {
-        return Box::new(self.clone());
+        Box::new(self.clone())
     }
 }
 

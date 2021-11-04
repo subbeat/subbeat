@@ -4,7 +4,7 @@ use std::{collections::HashMap, io::Read};
 
 use crate::types;
 
-fn print_buf(mut reader: Reader<impl Buf>) {
+pub fn print_buf(mut reader: Reader<impl Buf>) {
     let mut dst = [0; 1024];
     let mut vec = Vec::<u8>::new();
 
@@ -61,7 +61,6 @@ pub async fn post_with_headers(
     body: hyper::Body,
 ) -> types::Result<(StatusCode, Reader<impl Buf>)> {
     let mut builder = Request::builder().method(Method::POST).uri(url);
-    //.header("Accept", "application/json");
 
     for (k, v) in headers {
         builder = builder.header(k, v);
@@ -83,5 +82,6 @@ pub async fn post_with_headers(
     let body = hyper::body::aggregate(res).await?;
     let reader = body.reader();
 
+    // Err(anyhow::format_err!("bad"))
     Ok((status, reader))
 }

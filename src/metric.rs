@@ -58,7 +58,6 @@ impl Default for MetricResult {
 
 #[async_trait]
 pub trait Metric {
-
     fn boxed_clone(&self) -> Box<dyn Metric + Sync + Send>;
 
     // (to - from) / step < 10000
