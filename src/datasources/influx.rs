@@ -37,12 +37,25 @@ impl Influx {
 
 pub fn parse_result(reader: Reader<impl Buf>) -> types::Result<MetricResult> {
     let mut rdr = csv::Reader::from_reader(reader);
+    // for h in rdr.headers() {
+    //     println!("{:?}", h);
+    // }
+    // println!("len: {:?}", rdr.headers().unwrap().get(9));
+    let measurement = rdr.headers().unwrap().get(9).unwrap().to_owned();
+    // println!("_measurement {}", measurement);
+
+    let mut ts = Vec::new();
     for result in rdr.records() {
         let record = result?;
-        println!("{:?}", record);
+        let t = chrono::DateTime:: parse_from_rfc3339(record.get(5).unwrap()).unwrap().timestamp() as u64;
+        let v = record.get(6).unwrap().parse::<f64>().unwrap();
+        ts.push((t,v));
+        // println!("{:?} > {:?}", t, v);
+        // println!("{:?}", record);
     }
 
     let mut result: MetricResult = Default::default();
+    result.data.insert(measurement, ts);
     // result.data.insert(metric_name, values.to_owned());
 
     Ok(result)
