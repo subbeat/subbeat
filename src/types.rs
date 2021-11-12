@@ -3,6 +3,7 @@ use anyhow;
 // A simple type alias so as to DRY.
 
 pub type Result<T> = anyhow::Result<T>;
+pub type TimeSerie = Vec<(u64, f64)>;
 
 #[derive(Clone)]
 pub struct PrometheusConfig {
@@ -39,3 +40,5 @@ pub struct QueryConfig {
     pub to: u64,
     pub step: u64,
 }
+
+
